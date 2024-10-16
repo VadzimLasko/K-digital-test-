@@ -12,7 +12,7 @@ import {
   CModalFooter,
   CCardHeader,
 } from '@coreui/react-pro'
-import React, { createRef, useEffect, useState } from 'react'
+import React, { createRef, useEffect, useState, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import DocumentsApi from './Documents.Api'
 import { useParams } from 'react-router-dom'
@@ -23,6 +23,7 @@ import { cilArrowCircleLeft } from '@coreui/icons'
 import { useTypedSelector } from '../../store'
 import { Viewer, Worker, RenderPageProps } from '@react-pdf-viewer/core'
 import { printOrDownloadDoc } from '../../utils'
+import PrintAndSaveButtons from '../../components/PrintAndSaveButtons'
 
 const CustomPageLayer: React.FC<{
   renderPageProps: RenderPageProps
@@ -58,6 +59,8 @@ const Document = (): JSX.Element => {
   const [titleName, setTitleName] = useState('')
   const [dataFormat, setDataFormat] = useState('')
 
+  const componentRef = useRef<HTMLDivElement>(null)
+
   const { id } = useParams()
   const [searchParams] = useSearchParams()
   const docName = searchParams.get('name')
@@ -79,7 +82,7 @@ const Document = (): JSX.Element => {
         <CCardHeader className="px-4">
           <div>{docName}</div>
         </CCardHeader>
-        <CCardBody>
+        <CCardBody ref={componentRef}>
           <div
             style={{
               display: 'flex',
@@ -87,7 +90,7 @@ const Document = (): JSX.Element => {
               alignItems: 'center',
             }}
           >
-            <p className="fs-1">{titleName}</p>
+            <p className="fs-1 id-text-title">{titleName}</p>
           </div>
 
           <div
@@ -135,6 +138,8 @@ const Document = (): JSX.Element => {
           </div>
         </CCardBody>
       </CCard>
+
+      <PrintAndSaveButtons printRef={componentRef} />
     </CContainer>
   )
 }

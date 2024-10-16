@@ -1,5 +1,6 @@
 import {
   CButton,
+  CContainer,
   CCard,
   CCardBody,
   CCol,
@@ -36,6 +37,7 @@ import Modal from '../../components/Modal'
 import DocumentsApi from '../documents/Documents.Api'
 import AuthApi from '../auth/auth.api'
 import Card from '../../components/Card'
+import PrintAndSaveButtons from '../../components/PrintAndSaveButtons'
 
 import { getImagePlaceholderFromMime, phoneNumber } from '../../utils'
 import setTime, { setTimeV2 } from '../../helper/timeFormat'
@@ -97,6 +99,7 @@ const OrderDetail = (): JSX.Element => {
   const [reasonError, setReasonError] = useState(false)
   const [protocolModalVisible, setProtocolModalVisible] = useState(false)
   const [method, setMethod] = useState<null | string>(null)
+  const [prepareForPrint, setPrepareForPrint] = useState(false)
 
   const objects = useRef<any>(null)
   const objectsInput = useRef<any>(null)
@@ -314,7 +317,6 @@ const OrderDetail = (): JSX.Element => {
   }
 
   console.log(data, '<<<<<======= INI ADALAH DATA')
-
   const contentModal = (
     <>
       <div
@@ -608,7 +610,7 @@ const OrderDetail = (): JSX.Element => {
                             fontWeight: 'bold',
                           }}
                         >
-                          <p style={{}}>
+                          <p className="id-text-title" style={{}}>
                             Заявка № {data?.id} от {getDateV1(data?.createdAt)}
                             г.
                           </p>
@@ -1085,6 +1087,7 @@ const OrderDetail = (): JSX.Element => {
                       )}
                     </div>
                   </div>
+
                   <div
                     className="sign-section"
                     style={{
@@ -1122,6 +1125,10 @@ const OrderDetail = (): JSX.Element => {
                   </div>
                 </CForm>
               </CCol>
+              <PrintAndSaveButtons
+                printRef={firstSectionRef}
+                setPrepareForPrint={setPrepareForPrint}
+              />
             </CCardBody>
           </CCard>
           {/* THIRD CARD */}
@@ -1162,7 +1169,9 @@ const OrderDetail = (): JSX.Element => {
                             fontWeight: 'bold',
                           }}
                         >
-                          <p>Акт отбора проб № {actDetail?.id}</p>
+                          <p className="id-text-title">
+                            Акт отбора проб № {actDetail?.id}
+                          </p>
                         </div>
                       </div>
                     ) : (
@@ -1711,41 +1720,47 @@ const OrderDetail = (): JSX.Element => {
                         />
                       )}
                     </div>
-                    <div
-                      id="sign-section-act"
-                      style={{
-                        display: 'none',
-                      }}
-                    >
+                    {prepareForPrint ? (
                       <div
+                        id="sign-section-act"
                         style={{
-                          display: 'flex',
-                          paddingTop: '6rem',
+                          display: 'block',
                         }}
                       >
                         <div
                           style={{
-                            flex: 1,
-                          }}
-                        >
-                          <span>Фамилия</span>
-                          <span>{'_'.repeat(20)}</span>
-                        </div>
-                        <div
-                          style={{
-                            flex: 1,
                             display: 'flex',
-                            justifyContent: 'end',
-                            flexDirection: 'row',
+                            paddingTop: '6rem',
                           }}
                         >
-                          <span>Подпись</span>
-                          <span>{'_'.repeat(20)}</span>
+                          <div
+                            style={{
+                              flex: 1,
+                            }}
+                          >
+                            <span>Фамилия</span>
+                            <span>{'_'.repeat(20)}</span>
+                          </div>
+                          <div
+                            style={{
+                              flex: 1,
+                              display: 'flex',
+                              justifyContent: 'end',
+                              flexDirection: 'row',
+                            }}
+                          >
+                            <span>Подпись</span>
+                            <span>{'_'.repeat(20)}</span>
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    ) : null}
                   </CForm>
                 </CCol>
+                <PrintAndSaveButtons
+                  printRef={documentRef}
+                  setPrepareForPrint={setPrepareForPrint}
+                />
               </CCardBody>
             </CCard>
           ) : (
@@ -1853,6 +1868,7 @@ const OrderDetail = (): JSX.Element => {
               >
                 <CForm>
                   {/* UPPER INFO BORDER */}
+
                   {isView ? (
                     <div>
                       <div
@@ -1866,7 +1882,9 @@ const OrderDetail = (): JSX.Element => {
                           fontWeight: 'bold',
                         }}
                       >
-                        <p style={{}}>Комментарии к заявке № {data?.id}</p>
+                        <p className="id-text-title" style={{}}>
+                          Комментарии к заявке № {data?.id}
+                        </p>
                       </div>
                     </div>
                   ) : (
@@ -1953,39 +1971,43 @@ const OrderDetail = (): JSX.Element => {
                         }}
                       ></div>
                       {/* //FIELD BAR */}
-                      <div style={{ width: '100%', padding: '0 1rem' }}>
-                        <CFormTextarea
-                          id="info"
-                          rows={data?.comment?.split('\n').length}
-                          placeholder={
-                            'Введите: Класс прочности бетона; Материал; Тип грунта; и т.д.' as any
-                          }
-                          style={{
-                            width: '100%',
-                          }}
-                          value={data?.comment}
-                          onChange={(e: any) => {
-                            setDataComment({
-                              text: e?.target?.value,
-                              orderId: params.id,
-                              userId: dataUser.id,
-                            })
-                            sendButtonStyle(e?.target?.value)
-                          }}
-                        />
-                        <div
-                          style={{
-                            display: 'flex',
-                            justifyContent: 'right',
-                          }}
-                        ></div>
-                      </div>
+                      {prepareForPrint ? null : (
+                        <div style={{ width: '100%', padding: '0 1rem' }}>
+                          <CFormTextarea
+                            id="info"
+                            rows={data?.comment?.split('\n').length}
+                            placeholder={
+                              'Введите: Класс прочности бетона; Материал; Тип грунта; и т.д.' as any
+                            }
+                            style={{
+                              width: '100%',
+                            }}
+                            value={data?.comment}
+                            onChange={(e: any) => {
+                              setDataComment({
+                                text: e?.target?.value,
+                                orderId: params.id,
+                                userId: dataUser.id,
+                              })
+                              sendButtonStyle(e?.target?.value)
+                            }}
+                          />
+                          <div
+                            style={{
+                              display: 'flex',
+                              justifyContent: 'right',
+                            }}
+                          ></div>
+                        </div>
+                      )}
                     </div>
-
-                    {/* BUTTOM BORDER */}
                   </div>
                 </CForm>
               </CCol>
+              <PrintAndSaveButtons
+                printRef={commentRef}
+                setPrepareForPrint={setPrepareForPrint}
+              />
             </CCardBody>
           </CCard>
           {/* PROTOCOL CARD */}
